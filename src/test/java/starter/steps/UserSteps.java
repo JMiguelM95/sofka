@@ -1,14 +1,11 @@
 package starter.steps;
 
-import com.google.gson.JsonObject;
 import io.cucumber.datatable.DataTable;
 import io.cucumber.java.en.And;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
-import io.restassured.http.ContentType;
 import io.restassured.response.Response;
-import net.serenitybdd.core.Serenity;
 import net.serenitybdd.rest.SerenityRest;
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormat;
@@ -20,7 +17,7 @@ import java.util.List;
 import java.util.Map;
 
 import static net.serenitybdd.rest.SerenityRest.restAssuredThat;
-import static org.assertj.core.api.Java6Assertions.assertThat;
+import static org.hamcrest.Matchers.isEmptyString;
 import static org.hamcrest.core.IsEqual.equalTo;
 
 public class UserSteps {
@@ -28,13 +25,12 @@ public class UserSteps {
 	private final UserAPI userAPI = new UserAPI();
 	private Map<String, String> userDataToUpdate;
 	int userId;
-	Response userResponse, userUpdateResponse;
+	Response userResponse, userUpdateResponse, userDeleteResponse;
 
 
 	@Given("I search for a user with ID {int}")
 	public void iSearchForUserWithId(int userId) {
 		this.userId = userId;
-		// No action needed in Given step for this scenario
 	}
 
 	@When("I call the user API endpoint")
@@ -93,5 +89,22 @@ public class UserSteps {
 		} catch (IllegalArgumentException e) {
 			throw new AssertionError("Invalid date format for updatedAt: " + updatedAtString);
 		}
+	}
+
+	@Given("I have to delete user ID {int}")
+	public void iHaveToDeleteUserID(int userId) {
+		this.userId = userId;
+	}
+
+	@When("I send a DELETE request to the user API endpoint for that ID")
+	public void iSendADELETERequestToTheUserAPIEndpointForThatID() {
+		userAPI.deleteUser(userId);
+		userDeleteResponse = SerenityRest.lastResponse();
+	}
+
+	@And("the response body is empty")
+	public void theResponseBodyIsEmpty() {
+		userDeleteResponse.then()
+				.assertThat().body(isEmptyString());
 	}
 }
