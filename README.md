@@ -115,3 +115,5 @@ mvn clean verify
 ```
 mvn serenity:aggregate
 ```
+
+Author: Miguel Miranda
